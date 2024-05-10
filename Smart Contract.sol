@@ -8,10 +8,6 @@ contract SmartContract{
     uint numUID=0;//uid个数
     mapping(uint =>string) proofList;//授权证明proof
     uint numProofs=0;//proof数量
-    mapping(uint =>string) tagList;//可链接标志列表
-    uint numTag=0;//tag数量
-    mapping(uint =>string) pkList;//医生列表
-    uint numPk=0;//pk数量
     //一个did document
     struct DID{
         string id;
@@ -21,44 +17,6 @@ contract SmartContract{
     }
     DID [] didList;//did document列表
     uint numofdid = 0;
-    //获取环成员集合
-    function getPublicKeySet(uint256 num) public view returns(string[] memory){
-        //初始化返回数组大小
-        string[] memory publicKeyList = new string[](uint256(num)*2);
-        uint256 random = uint256(keccak256(abi.encodePacked(block.difficulty, block.timestamp)));
-        //取模 随机数范围合理
-        uint256 t = random%(numPk-1);
-        uint flag = 0;
-        for(uint i1 = t;i1<numPk-1;i1++){
-            publicKeyList[i1] = pkList[i1];
-            flag++;
-        }
-        return publicKeyList;
-    }
-
-    VerifyRingSignaturePrecompiled ringsig;
-    constructor(){
-         ringsig = VerifyRingSignaturePrecompiled(0x5002);
-    }
-
-    string result = "fail";
-    function verify(string [] memory data)public{
-        string memory sigInfo = data[20];
-        string memory tagValue = data[8];
-        if(selectTag(tagValue) == false){//判断可链接性
-            result = "fail to link";//不通过
-        }
-        else{
-            if(ringsig.verify(sigInfo) == false){//环签名验证
-                result = "ringsig fail";
-            }
-            else{
-                result = "Success to verify";
-                tagList[numTag++] = tagValue;
-                result = "Success";    
-            }
-        }
-    }
     function getVerifyResult() public view returns(string memory){
         return result;
     }
